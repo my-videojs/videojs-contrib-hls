@@ -32,8 +32,8 @@
     <p>The video below is an <a href="https://developer.apple.com/library/ios/documentation/networkinginternet/conceptual/streamingmediaguide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40008332-CH1-SW1">HTTP Live Stream</a>. On desktop browsers other than Safari, the HLS plugin will polyfill support for the format on top of the video.js Flash tech.</p>
     <p>Due to security restrictions in Flash, you will have to load this page over HTTP(S) to see the example in action.</p>
   </div>
-  <video id="videojs-contrib-hls-player" class="video-js vjs-default-skin" controls>
-    <source src="http://v7.huayu.nd/b/p/1816/5edf82a084414397b2a55688daea173b/d308451f0467496cbc8103248cb8b879.v.320.240.mp4/secret.m3u8" type="application/x-mpegURL">
+  <video id="videojs-contrib-hls-player" class="video-js vjs-default-skin" controls autoplay>
+    <source src="http://v7.huayu.nd/b/p/1816/f2806daa0965486ca2b7f7b88691d7b4/40fde24a4f9141bca93d588cefe8caa7.v.854.480.mp4/secret.m3u8" type="application/x-mpegURL">
   </video>
 
   <form id=load-url>
@@ -41,7 +41,7 @@
       Video URL:
       <input
         id=url type=url
-             value="http://v7.huayu.nd/b/p/1816/5edf82a084414397b2a55688daea173b/d308451f0467496cbc8103248cb8b879.v.320.240.mp4/secret.m3u8">
+             value="http://v7.huayu.nd/b/p/1816/f2806daa0965486ca2b7f7b88691d7b4/40fde24a4f9141bca93d588cefe8caa7.v.854.480.mp4/secret.m3u8">
     </label>
     <button type=submit>Load</button>
   </form>
@@ -58,7 +58,7 @@
       var options = {hls: {
           keyCallback: (callback) => {
             $.ajax({
-              url: 'http://v7.huayu.nd/b/p/1816/5edf82a084414397b2a55688daea173b/d308451f0467496cbc8103248cb8b879.v.320.240.mp4/secret.m3u8',
+              url: 'http://v7.huayu.nd/b/p/1816/f2806daa0965486ca2b7f7b88691d7b4/40fde24a4f9141bca93d588cefe8caa7.v.854.480.mp4/secret.m3u8',
               bodyProxy: true,
               headers: []
             }).done(function(data) {

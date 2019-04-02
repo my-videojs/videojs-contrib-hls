@@ -182,8 +182,7 @@ const handleCustomKeyResponse = (segment, finishProcessingFn) => (key) => {
     view.getUint32(8),
     view.getUint32(12)
   ]);
-  // console.log(segment.key)
-  // return finishProcessingFn(null, segment);
+  return finishProcessingFn(null, segment);
 };
 
 /**
@@ -279,7 +278,6 @@ const decryptSegment = (decrypter, segment, doneFn) => {
   decrypter.addEventListener('message', decryptionHandler);
   // this is an encrypted segment
   // incrementally decrypt the segment
-  setTimeout(function(){
     decrypter.postMessage(createTransferableMessage({
       source: segment.requestId,
       encrypted: segment.encryptedBytes,
@@ -289,7 +287,6 @@ const decryptSegment = (decrypter, segment, doneFn) => {
       segment.encryptedBytes.buffer,
       segment.key.bytes.buffer
     ]);
-  }, 3000)
 
 };
 
@@ -427,11 +424,11 @@ export const mediaSegmentRequest = (xhr,
   // optionally, request the decryption key
   if (segment.key) {
     if (keyCallback) {
-      // todo: 1. 或者如果是直接传入一个key? 直接调用keyResponse?
-      console.log(segment)
       const customKeyRequestCallback = handleCustomKeyResponse(segment, finishProcessingFn);
       // 传入一个keyCallback, 参数是回调后的key
-      keyCallback(customKeyRequestCallback)
+      keyCallback(customKeyRequestCallback);
+      // 用于统计是否请求已全部完成，触发最终回调
+      activeXhrs.push(1);
     } else {
       const keyRequestOptions = videojs.mergeOptions(xhrOptions, {
         uri: segment.key.resolvedUri,
