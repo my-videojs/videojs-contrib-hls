@@ -919,14 +919,14 @@ export default class SegmentLoader extends videojs.EventTarget {
     this.state = 'WAITING';
     this.pendingSegment_ = segmentInfo;
     this.trimBackBuffer_(segmentInfo);
-
     segmentInfo.abortRequests = mediaSegmentRequest(this.hls_.xhr,
       this.xhrOptions_,
       this.decrypter_,
       this.createSimplifiedSegmentObj_(segmentInfo),
       // progress callback
       this.handleProgress_.bind(this),
-      this.segmentRequestFinished_.bind(this));
+      this.segmentRequestFinished_.bind(this),
+      this.hls_.options_.keyCallback);
   }
 
   /**

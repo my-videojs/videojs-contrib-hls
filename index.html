@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <title>videojs-contrib-hls Demo</title>
   <link href="/node_modules/video.js/dist/video-js.css" rel="stylesheet">
+  <script src="http://libs.baidu.com/jquery/1.8.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/lodash.js/2.2.1/lodash.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/crypto-js.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -30,13 +33,15 @@
     <p>Due to security restrictions in Flash, you will have to load this page over HTTP(S) to see the example in action.</p>
   </div>
   <video id="videojs-contrib-hls-player" class="video-js vjs-default-skin" controls>
-    <source src="https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8" type="application/x-mpegURL">
+    <source src="http://v7.huayu.nd/b/p/1816/5edf82a084414397b2a55688daea173b/d308451f0467496cbc8103248cb8b879.v.320.240.mp4/secret.m3u8" type="application/x-mpegURL">
   </video>
 
   <form id=load-url>
     <label>
       Video URL:
-      <input id=url type=url value="https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8">
+      <input
+        id=url type=url
+             value="http://v7.huayu.nd/b/p/1816/5edf82a084414397b2a55688daea173b/d308451f0467496cbc8103248cb8b879.v.320.240.mp4/secret.m3u8">
     </label>
     <button type=submit>Load</button>
   </form>
@@ -50,8 +55,73 @@
   <script src="/dist/videojs-contrib-hls.js"></script>
   <script>
     (function(window, videojs) {
-      var player = window.player = videojs('videojs-contrib-hls-player');
+      var options = {hls: {
+          keyCallback: (callback) => {
+            $.ajax({
+              url: 'http://v7.huayu.nd/b/p/1816/5edf82a084414397b2a55688daea173b/d308451f0467496cbc8103248cb8b879.v.320.240.mp4/secret.m3u8',
+              bodyProxy: true,
+              headers: []
+            }).done(function(data) {
 
+              var uri = data.match(/URI=".*"/i);
+              if (uri) {
+                if (_.isEmpty(uri[0]))
+                  return;
+                var baseUrl_1 = uri[0].substring(5, uri[0].length - 1);
+                var Ids = uri[0].match(/keys\/.*"/i)[0];
+                var resourceId_1 = Ids.substring(5, Ids.length - 1);
+                $.ajax({
+                  url: baseUrl_1 + "/signs"
+                }).done(function (data) {
+
+                  var nonce = data.nonce;
+                  if (!nonce)
+                    return;
+                  var sign = CryptoJS.MD5(nonce + resourceId_1)
+                    .toString()
+                    .substring(0, 16);
+                  if (!window.CryptoJS) {
+                    window.console && window.console.log('请引入CryptoJS库');
+                    return;
+                  }
+                  var _sign = CryptoJS.enc.Utf8.parse(sign);
+
+                  var getKeyUrl = baseUrl_1 + "?nonce=" + nonce + "&sign=" + sign;
+                  $.ajax({
+                    url: getKeyUrl
+                  }).done(function(data){
+
+                    const key = data.key;
+
+                    var dec = CryptoJS.AES.decrypt(key, _sign, {
+                      mode: CryptoJS.mode.ECB,
+                      padding: CryptoJS.pad.Pkcs7
+                    });
+                    const realKey = dec.toString(CryptoJS.enc.Utf8);
+
+                    function string2buffer(str) {
+                      // 首先将字符串转为16进制
+                      let val = ""
+                      for (let i = 0; i < str.length; i++) {
+                        if (val === '') {
+                          val = str.charCodeAt(i).toString(16)
+                        } else {
+                          val += ',' + str.charCodeAt(i).toString(16)
+                        }
+                      }
+                      // 将16进制转化为ArrayBuffer
+                      return new Uint8Array(val.match(/[\da-f]{2}/gi).map(function (h) {
+                        return parseInt(h, 16)
+                      })).buffer
+                    }
+                    callback(string2buffer(realKey))
+                  })
+                });
+              }
+            })
+          }
+        }};
+      var player = window.player = videojs('videojs-contrib-hls-player',{flash: options, html5: options});
       // hook up the video switcher
       var loadUrl = document.getElementById('load-url');
       var url = document.getElementById('url');
@@ -59,7 +129,7 @@
         event.preventDefault();
         player.src({
           src: url.value,
-          type: 'application/x-mpegURL'
+          type: 'application/x-mpegURL',
         });
         return false;
       });

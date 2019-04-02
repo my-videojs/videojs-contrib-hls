@@ -220,7 +220,7 @@ Some options, such as `withCredentials` can be passed in to hls during
 var player = videojs('some-video-id');
 
 player.src({
-  src: 'https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8',
+  src: 'http://v1.ws.wx.99.com/b/p/114/efab88d43a4a4bd28eae2e34dff9a7a2/7de7ab3caff843cf8a6f25629c134e6d.v.854.480.mp4/index.m3u8',
   type: 'application/x-mpegURL',
   withCredentials: true
 });
@@ -479,7 +479,7 @@ videojs.Hls.xhr.beforeRequest = function(options) {
 var player = videojs('video-player-id');
 player.ready(function() {
   this.src({
-    src: 'https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8',
+    src: 'http://v1.ws.wx.99.com/b/p/114/efab88d43a4a4bd28eae2e34dff9a7a2/7de7ab3caff843cf8a6f25629c134e6d.v.854.480.mp4/index.m3u8',
     type: 'application/x-mpegURL',
   });
 });

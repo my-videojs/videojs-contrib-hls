@@ -175,7 +175,6 @@ const Component = videojs.getComponent('Component');
 class HlsHandler extends Component {
   constructor(source, tech, options) {
     super(tech, options.hls);
-
     // tech.player() is deprecated but setup a reference to HLS for
     // backwards-compatibility
     if (tech.options_ && tech.options_.playerId) {

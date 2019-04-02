@@ -164,6 +164,29 @@ const handleKeyResponse = (segment, finishProcessingFn) => (error, request) => {
 };
 
 /**
+ *
+ * @param segment
+ * @param finishProcessingFn
+ * @returns {function(*=)}
+ */
+// todo: 如果是自定义的key的流程
+const handleCustomKeyResponse = (segment, finishProcessingFn) => (key) => {
+  if (key.byteLength !== 16) {
+    console.error('error');
+    return;
+  }
+  const view = new DataView(key);
+  segment.key.bytes = new Uint32Array([
+    view.getUint32(0),
+    view.getUint32(4),
+    view.getUint32(8),
+    view.getUint32(12)
+  ]);
+  // console.log(segment.key)
+  // return finishProcessingFn(null, segment);
+};
+
+/**
  * Handle init-segment responses
  *
  * @param {Object} segment - a simplified copy of the segmentInfo object
@@ -254,18 +277,20 @@ const decryptSegment = (decrypter, segment, doneFn) => {
   };
 
   decrypter.addEventListener('message', decryptionHandler);
-
   // this is an encrypted segment
   // incrementally decrypt the segment
-  decrypter.postMessage(createTransferableMessage({
-    source: segment.requestId,
-    encrypted: segment.encryptedBytes,
-    key: segment.key.bytes,
-    iv: segment.key.iv
-  }), [
-    segment.encryptedBytes.buffer,
-    segment.key.bytes.buffer
-  ]);
+  setTimeout(function(){
+    decrypter.postMessage(createTransferableMessage({
+      source: segment.requestId,
+      encrypted: segment.encryptedBytes,
+      key: segment.key.bytes,
+      iv: segment.key.iv
+    }), [
+      segment.encryptedBytes.buffer,
+      segment.key.bytes.buffer
+    ]);
+  }, 3000)
+
 };
 
 /**
@@ -294,7 +319,6 @@ const getMostImportantError = (errors) => {
 const waitForCompletion = (activeXhrs, decrypter, doneFn) => {
   let errors = [];
   let count = 0;
-
   return (error, segment) => {
     if (error) {
       // If there are errors, we have to abort any outstanding requests
@@ -395,20 +419,29 @@ export const mediaSegmentRequest = (xhr,
                                     decryptionWorker,
                                     segment,
                                     progressFn,
-                                    doneFn) => {
+                                    doneFn,
+                                    keyCallback) => {
   const activeXhrs = [];
   const finishProcessingFn = waitForCompletion(activeXhrs, decryptionWorker, doneFn);
 
   // optionally, request the decryption key
   if (segment.key) {
-    const keyRequestOptions = videojs.mergeOptions(xhrOptions, {
-      uri: segment.key.resolvedUri,
-      responseType: 'arraybuffer'
-    });
-    const keyRequestCallback = handleKeyResponse(segment, finishProcessingFn);
-    const keyXhr = xhr(keyRequestOptions, keyRequestCallback);
+    if (keyCallback) {
+      // todo: 1. 或者如果是直接传入一个key? 直接调用keyResponse?
+      console.log(segment)
+      const customKeyRequestCallback = handleCustomKeyResponse(segment, finishProcessingFn);
+      // 传入一个keyCallback, 参数是回调后的key
+      keyCallback(customKeyRequestCallback)
+    } else {
+      const keyRequestOptions = videojs.mergeOptions(xhrOptions, {
+        uri: segment.key.resolvedUri,
+        responseType: 'arraybuffer'
+      });
+      const keyRequestCallback = handleKeyResponse(segment, finishProcessingFn);
+      const keyXhr = xhr(keyRequestOptions, keyRequestCallback);
 
-    activeXhrs.push(keyXhr);
+      activeXhrs.push(keyXhr);
+    }
   }
 
   // optionally, request the associated media init segment
