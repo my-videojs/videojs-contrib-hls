@@ -55,14 +55,17 @@
   <script src="/dist/videojs-contrib-hls.js"></script>
   <script>
     (function(window, videojs) {
-      var options = {hls: {
+      var url = document.getElementById('url');
+      var options = {
+        autoplay:true,
+        hls: {
           keyCallback: (callback) => {
             $.ajax({
-              url: 'http://v7.huayu.nd/b/p/1816/f2806daa0965486ca2b7f7b88691d7b4/40fde24a4f9141bca93d588cefe8caa7.v.854.480.mp4/secret.m3u8',
+              url: url.value,
               bodyProxy: true,
               headers: []
             }).done(function(data) {
-
+              // 获取resourceId
               var uri = data.match(/URI=".*"/i);
               if (uri) {
                 if (_.isEmpty(uri[0]))
@@ -73,7 +76,7 @@
                 $.ajax({
                   url: baseUrl_1 + "/signs"
                 }).done(function (data) {
-
+                  // 获取nonce
                   var nonce = data.nonce;
                   if (!nonce)
                     return;
@@ -92,7 +95,7 @@
                   }).done(function(data){
 
                     const key = data.key;
-
+                    // 解密得到最终的秘钥
                     var dec = CryptoJS.AES.decrypt(key, _sign, {
                       mode: CryptoJS.mode.ECB,
                       padding: CryptoJS.pad.Pkcs7
@@ -114,6 +117,7 @@
                         return parseInt(h, 16)
                       })).buffer
                     }
+                    // 将秘钥转为arrayBuffer
                     callback(string2buffer(realKey))
                   })
                 });
@@ -122,9 +126,9 @@
           }
         }};
       var player = window.player = videojs('videojs-contrib-hls-player',{flash: options, html5: options});
+
       // hook up the video switcher
       var loadUrl = document.getElementById('load-url');
-      var url = document.getElementById('url');
       loadUrl.addEventListener('submit', function(event) {
         event.preventDefault();
         player.src({
