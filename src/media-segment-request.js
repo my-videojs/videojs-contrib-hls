@@ -411,22 +411,24 @@ const handleProgress = (segment, progressFn) => (event) => {
  * @returns {Function} a function that, when invoked, immediately aborts all
  *                     outstanding requests
  */
-export const mediaSegmentRequest = (xhr,
-                                    xhrOptions,
-                                    decryptionWorker,
-                                    segment,
-                                    progressFn,
-                                    doneFn,
-                                    keyCallback) => {
+export const mediaSegmentRequest = (
+  xhr,
+  xhrOptions,
+  decryptionWorker,
+  segment,
+  progressFn,
+  doneFn,
+  keyCallback,
+  playLists
+) => {
   const activeXhrs = [];
   const finishProcessingFn = waitForCompletion(activeXhrs, decryptionWorker, doneFn);
-
   // optionally, request the decryption key
   if (segment.key) {
     if (keyCallback) {
       const customKeyRequestCallback = handleCustomKeyResponse(segment, finishProcessingFn);
       // 传入一个keyCallback, 参数是回调后的key
-      keyCallback(customKeyRequestCallback);
+      keyCallback(customKeyRequestCallback, playLists.srcUrl);
       // 用于统计是否请求已全部完成，触发最终回调
       activeXhrs.push(1);
     } else {

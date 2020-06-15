@@ -5,8 +5,8 @@
   <title>videojs-contrib-hls Demo</title>
   <link href="/node_modules/video.js/dist/video-js.css" rel="stylesheet">
   <script src="http://libs.baidu.com/jquery/1.8.1/jquery.min.js"></script>
-  <script src="https://cdn.bootcss.com/lodash.js/2.2.1/lodash.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/crypto-js.js"></script>
+  <script src="https://cdn.bootcss.com/lodash.js/4.17.9/lodash.js"></script>
+  <script src="https://cdn.bootcss.com/crypto-js/3.1.9/crypto-js.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,7 +33,7 @@
     <p>Due to security restrictions in Flash, you will have to load this page over HTTP(S) to see the example in action.</p>
   </div>
   <video id="videojs-contrib-hls-player" class="video-js vjs-default-skin" controls autoplay>
-    <source src="http://v7.huayu.nd/b/p/1816/f2806daa0965486ca2b7f7b88691d7b4/40fde24a4f9141bca93d588cefe8caa7.v.854.480.mp4/secret.m3u8" type="application/x-mpegURL">
+    <source src="http://v1-js.e.99.com/28398/video/35141211646846d8ac9aa8ec759ae416/0d22bb0a72b34ff69974c07cde42c3d9.v.640.384.mp4/secret.m3u8" type="application/x-mpegURL">
   </video>
 
   <form id=load-url>
@@ -41,7 +41,7 @@
       Video URL:
       <input
         id=url type=url
-             value="http://v7.huayu.nd/b/p/1816/f2806daa0965486ca2b7f7b88691d7b4/40fde24a4f9141bca93d588cefe8caa7.v.854.480.mp4/secret.m3u8">
+             value="http://v1-js.e.99.com/28398/video/35141211646846d8ac9aa8ec759ae416/0d22bb0a72b34ff69974c07cde42c3d9.v.640.384.mp4/secret.m3u8">
     </label>
     <button type=submit>Load</button>
   </form>
@@ -59,9 +59,9 @@
       var options = {
         autoplay:true,
         hls: {
-          keyCallback: (callback) => {
+          keyCallback: (callback, url) => {
             $.ajax({
-              url: url.value,
+              url: url,
               bodyProxy: true,
               headers: []
             }).done(function(data) {
