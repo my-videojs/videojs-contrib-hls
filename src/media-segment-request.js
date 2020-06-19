@@ -47,7 +47,9 @@ const segmentXhrHeaders = function(segment) {
  */
 const abortAll = (activeXhrs) => {
   activeXhrs.forEach((xhr) => {
-    xhr.abort();
+    if (typeof xhr.abort === 'function') {
+      xhr.abort();
+    }
   });
 };
 
@@ -428,7 +430,7 @@ export const mediaSegmentRequest = (
     if (keyCallback) {
       const customKeyRequestCallback = handleCustomKeyResponse(segment, finishProcessingFn);
       // 传入一个keyCallback, 参数是回调后的key
-      keyCallback(customKeyRequestCallback, playLists.srcUrl);
+      keyCallback(customKeyRequestCallback, playLists ? playLists.srcUrl : "");
       // 用于统计是否请求已全部完成，触发最终回调
       activeXhrs.push(1);
     } else {
