@@ -928,7 +928,8 @@ export default class SegmentLoader extends videojs.EventTarget {
       this.handleProgress_.bind(this),
       this.segmentRequestFinished_.bind(this),
       this.hls_.options_.keyCallback,
-      this.hls_.playlists
+      this.hls_.playlists,
+      this.hls_
     );
   }
 

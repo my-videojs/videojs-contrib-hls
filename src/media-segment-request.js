@@ -172,7 +172,7 @@ const handleKeyResponse = (segment, finishProcessingFn) => (error, request) => {
  * @returns {function(*=)}
  */
 // todo: 如果是自定义的key的流程
-const handleCustomKeyResponse = (segment, finishProcessingFn) => (key) => {
+const handleCustomKeyResponse = (segment, hls, finishProcessingFn) => (key) => {
   if (key.byteLength !== 16) {
     console.error('error');
     return;
@@ -184,6 +184,8 @@ const handleCustomKeyResponse = (segment, finishProcessingFn) => (key) => {
     view.getUint32(8),
     view.getUint32(12)
   ]);
+  // 设置全局标识，如果存在则不重复调用 keyCallback
+  hls.key = key;
   return finishProcessingFn(null, segment);
 };
 
@@ -421,16 +423,21 @@ export const mediaSegmentRequest = (
   progressFn,
   doneFn,
   keyCallback,
-  playLists
+  playLists,
+  hls
 ) => {
   const activeXhrs = [];
   const finishProcessingFn = waitForCompletion(activeXhrs, decryptionWorker, doneFn);
   // optionally, request the decryption key
   if (segment.key) {
     if (keyCallback) {
-      const customKeyRequestCallback = handleCustomKeyResponse(segment, finishProcessingFn);
+      const customKeyRequestCallback = handleCustomKeyResponse(segment, hls, finishProcessingFn);
       // 传入一个keyCallback, 参数是回调后的key
-      keyCallback(customKeyRequestCallback, playLists ? playLists.srcUrl : "");
+      if (!hls.key) {
+        keyCallback(customKeyRequestCallback, playLists ? playLists.srcUrl : "");
+      } else {
+        customKeyRequestCallback(hls.key)
+      }
       // 用于统计是否请求已全部完成，触发最终回调
       activeXhrs.push(1);
     } else {
